@@ -31,3 +31,27 @@ def dislikes_reccomendation(ds: MetalAlbumDataSet, dislikes: list, likes: list):
             i -=1
         i += 1
     return arr
+
+class Reccomendations:
+    reccomendation_history = []
+    def reccomendation(self, ds: MetalAlbumDataSet, dislikes: list, likes: list):
+        arr = likes_reccomendation(ds, likes)
+        i = 0
+        while i < len(arr):
+            if arr[i] in dislikes:
+                arr.pop(i)
+                i -=1
+            i += 1
+        arr = arr[:10]
+        res = MetalAlbumDataSet(ds=arr, show_number=10)
+        self.reccomendation_history.append(res)
+        return res
+    
+    def __str__(self) -> str:
+        res= ""
+        for i in range(len(self.reccomendation_history)):
+            res += f"Рекомендация {i}:\n{self.reccomendation_history[i]}\n"
+        return res
+    
+    def __getitem__(self, key: int):
+        return self.reccomendation_history[key]

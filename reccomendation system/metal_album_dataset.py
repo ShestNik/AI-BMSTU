@@ -63,15 +63,13 @@ class MetalAlbumDataSet:
         self.dataset = data
     
     def convert_attributes(self, attrs: list):
-        n = attrs[5].count(':')
         attributes = [
             band_variants.index(attrs[1])/len(band_variants),
             int(attrs[2]),
             1 if attrs[3] == 'Оригинальный' else 0,
             format_variants.index(attrs[4])/len(format_variants),
-            datetime.strptime(attrs[5], '%M:%S') if n == 1 else datetime.strptime(attrs[5], '%H:%M:%S')
+            self.convert_duration(attrs[5])
         ]
-        attributes[4] = (attributes[4]-datetime(1900,1,1)).total_seconds()
         return attributes
     
     @staticmethod
@@ -102,6 +100,7 @@ class MetalAlbumDataSet:
         duration = datetime.strptime(duration, pattern)
         duration = (duration-datetime(1900,1,1)).total_seconds()
         return  duration
+
     @staticmethod
     def convert_year(year: str):
         return int(year)
@@ -113,7 +112,7 @@ class MetalAlbumDataSet:
             attrs['Год'],
             'Оригинальный' if attrs['Оригинальный/Кавер'] == 1 else 'Кавер',
             format_variants[int(attrs['Формат']* len(format_variants))],
-            datetime.fromtimestamp(attrs['Длительность']).strftime('%H:%M:%S')
+            datetime.utcfromtimestamp(attrs['Длительность']).strftime('%H:%M:%S')
         ]
         attrs = dict(zip(attributes_list,attrs))
         return attrs
@@ -129,7 +128,7 @@ class MetalAlbumDataSet:
         i = 0
         for object in self.dataset:
             attrs = self.convert_attributes_reverse(object['Атрибуты'])
-            string = f"id: {object['id']}, название: {object['Название']}, исполнитель: {attrs['Исполнитель']}"
+            string = f"id: {object['id']}, название: {object['Название']}, исполнитель: {attrs['Исполнитель']}, год выхода: {attrs['Год']}, длительность:  {attrs['Длительность']}"
             if i >= self.show_number:
                 break
             i += 1
@@ -146,4 +145,4 @@ class MetalAlbumDataSet:
 
 if __name__ == "__main__":
     ds = MetalAlbumDataSet('documents/dataset.txt')
-    print(ds.dataset)
+    print(len(ds))
